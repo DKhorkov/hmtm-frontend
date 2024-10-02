@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { gql } from "@/graphql";
@@ -14,10 +16,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { redirect } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email("Введите действительную почту"),
@@ -31,6 +31,7 @@ const SIGN_UP = gql(`
 `);
 
 const Register = () => {
+  const router = useRouter();
   const { toast } = useToast();
   const [register] = useMutation(SIGN_UP);
 
@@ -46,7 +47,7 @@ const Register = () => {
     register({ variables: { input: { credentials } } })
       .then(() => {
         toast({ title: "Вы успешно зарегистрировались" });
-        redirect("/login");
+        router.push("/login");
       })
       .catch((error: Error) => {
         toast({ title: "Произошла ошибка", description: error?.message });
@@ -55,7 +56,7 @@ const Register = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-64 space-y-8">
         <FormField
           control={form.control}
           name="email"
@@ -63,7 +64,11 @@ const Register = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="email@example.com" {...field} />
+                <Input
+                  placeholder="email@example.com"
+                  type="email"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,7 +89,9 @@ const Register = () => {
           )}
         />
 
-        <Button type="submit">Sign Up</Button>
+        <div className="flex justify-center">
+          <Button type="submit">Sign Up</Button>
+        </div>
       </form>
     </Form>
   );
